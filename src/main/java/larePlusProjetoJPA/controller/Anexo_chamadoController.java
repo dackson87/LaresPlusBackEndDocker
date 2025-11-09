@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import larePlusProjetoJPA.entity.Anexo_chamado;
 import larePlusProjetoJPA.repository.Anexo_chamadoRepository;
 
-@CrossOrigin(origins = "http://10.0.2.2:8081")
+@CrossOrigin(origins = "*")
 @RestController
 public class Anexo_chamadoController {@Autowired
 	private Anexo_chamadoRepository anexo_chamadoRepository;

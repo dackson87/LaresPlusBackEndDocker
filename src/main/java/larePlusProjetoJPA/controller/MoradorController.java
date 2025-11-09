@@ -21,27 +21,29 @@ import org.springframework.web.bind.annotation.RestController;
 import larePlusProjetoJPA.entity.Morador;
 import larePlusProjetoJPA.repository.MoradorRepository;
 
-@CrossOrigin(origins = "http://10.0.2.2:8081")
+@CrossOrigin(origins = "*")
 @RestController
 public class MoradorController {
 	@Autowired
 	private MoradorRepository moradorRepository;
 	
 	@PostMapping("/cadastro_morador")
-	public ResponseEntity<String> cadastroMorador(@RequestBody Morador morador) {
+	public ResponseEntity<Map<String, Object>> cadastroMorador(@RequestBody Morador morador) {
 	    Optional<Morador> moradorOptional = moradorRepository.findByEmail(morador.getEmail());
 
 	    if (moradorOptional.isPresent()) {
-	        return ResponseEntity.status(HttpStatus.CONFLICT).body("Email já cadastrado, use outro!");
+	        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("mensagem", "Email já cadastrado, use outro!"));
 	    }
 
-	    moradorRepository.save(morador);
+	    Morador novoMorador = moradorRepository.save(morador);
 
-	    return ResponseEntity.status(HttpStatus.CREATED).body("Usuário cadastrado!");
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("id_morador", novoMorador.getId_morador());
+	    response.put("mensagem", "Usuário cadastrado com sucesso!");
+
+	    return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
-
-	
 	@PostMapping("/morador")
 	public String saveMorador(@RequestBody Morador morador) {
 		moradorRepository.save(morador);
@@ -53,7 +55,6 @@ public class MoradorController {
 		moradorRepository.saveAll(moradores);
 		return "Moradores adicionado no sistema!";
 	}
-	
 	
 	@GetMapping("/validar_morador")
 	public ResponseEntity<?> validarMorador(@RequestParam String email, @RequestParam String senha) {
@@ -71,8 +72,6 @@ public class MoradorController {
 
 	    return ResponseEntity.ok(response);
 	}
-
-	
 	
 	@GetMapping("/morador")
 	public List<Morador> getMoradoresTESTE() {
