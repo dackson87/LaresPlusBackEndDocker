@@ -153,6 +153,11 @@ public class Chamado_servico {
 	public void setSituacao(Situacao situacao) {
 		this.situacao = situacao;
 	}
+
+	public Object getData_solicitacao() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 																									
 }
 

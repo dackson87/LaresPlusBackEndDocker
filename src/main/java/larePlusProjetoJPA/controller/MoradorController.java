@@ -69,9 +69,11 @@ public class MoradorController {
 	    Map<String, Object> response = new HashMap<>();
 	    response.put("id_morador", morador.getId_morador());
 	    response.put("nome", morador.getNome());
+	    response.put("tipo_usuario", morador.getTipo_usuario()); // ⭐ NOVO!
 
 	    return ResponseEntity.ok(response);
 	}
+
 	
 	@GetMapping("/morador")
 	public List<Morador> getMoradoresTESTE() {

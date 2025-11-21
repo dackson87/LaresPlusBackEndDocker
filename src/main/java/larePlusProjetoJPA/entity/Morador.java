@@ -14,72 +14,88 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name= "morador")//Tem relação (1,1) com APARTAMENTO, e APARTAMENTO tem relação (1,n)
-//A chave estrangeira é id_apartamento
+@Table(name = "morador")
 public class Morador {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id_morador;
-	
-	@Column(nullable = false, length = 100)
-	private String nome;
-	
-	@Column(nullable = false, length = 100, unique = true)
-	private String email;
 
-	@Column(nullable = false, length = 50)
-	private String senha;
-	
-	@ManyToOne
-	@JoinColumn(name="id_apartamento")
-	private Apartamento apartamento;
-	
-	@OneToMany(mappedBy="morador")
-	Set<Telefone_morador> telefones = new HashSet<>();
-	
-	@OneToMany(mappedBy="morador")
-	Set<Agendamento> agendamentos = new HashSet<>();
-	
-	@OneToMany(mappedBy="morador")
-	Set<Chamado_servico> chamados = new HashSet<>();
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id_morador;
 
-	public Long getId_morador() {
-		return id_morador;
-	}
+    @Column(nullable = false, length = 100)
+    private String nome;
 
-	public void setId_morador(Long id_morador) {
-		this.id_morador = id_morador;
-	}
+    @Column(nullable = false, length = 100, unique = true)
+    private String email;
 
-	public String getNome() {
-		return nome;
-	}
+    @Column(nullable = false, length = 50)
+    private String senha;
 
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+    // ⭐ NOVO CAMPO: ADM ou MORADOR (padrão: MORADOR)
+    @Column(nullable = false, length = 20)
+    private String tipo_usuario = "MORADOR";
 
-	public String getEmail() {
-		return email;
-	}
+    @ManyToOne
+    @JoinColumn(name = "id_apartamento")
+    private Apartamento apartamento;
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    @OneToMany(mappedBy = "morador")
+    Set<Telefone_morador> telefones = new HashSet<>();
 
-	public String getSenha() {
-		return senha;
-	}
+    @OneToMany(mappedBy = "morador")
+    Set<Agendamento> agendamentos = new HashSet<>();
 
-	public void setSenha(String senha) {
-		this.senha = senha;
-	}
+    @OneToMany(mappedBy = "morador")
+    Set<Chamado_servico> chamados = new HashSet<>();
 
-	public Apartamento getApartamento() {
-		return apartamento;
-	}
+    public Long getId_morador() {
+        return id_morador;
+    }
 
-	public void setApartamento(Apartamento apartamento) {
-		this.apartamento = apartamento;
-	}
+    public void setId_morador(Long id_morador) {
+        this.id_morador = id_morador;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getSenha() {
+        return senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
+
+    public String getTipo_usuario() {
+        return tipo_usuario;
+    }
+
+    public void setTipo_usuario(String tipo_usuario) {
+        this.tipo_usuario = tipo_usuario;
+    }
+
+    public Apartamento getApartamento() {
+        return apartamento;
+    }
+
+    public void setApartamento(Apartamento apartamento) {
+        this.apartamento = apartamento;
+    }
+
+    public Object getId() {
+        return null;
+    }
 }

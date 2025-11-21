@@ -1,67 +1,82 @@
 package larePlusProjetoJPA.controller;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import larePlusProjetoJPA.entity.Chamado_servico;
 import larePlusProjetoJPA.repository.Chamado_servicoRepository;
 
+class ChamadoDTO {
+    public Long id_chamado;
+    public String descricao_chamado;
+    public String status;
+    public String data_solicitacao;
+
+    public ChamadoDTO(Long id, String descricao, String status, String data_solicitacao) {
+        this.id_chamado = id;
+        this.descricao_chamado = descricao;
+        this.status = status;
+        this.data_solicitacao = data_solicitacao;
+    }
+}
+
 @CrossOrigin(origins = "*")
 @RestController
+@RequestMapping("/chamado_servico")
 public class Chamado_servicoController {
-	@Autowired
-	private Chamado_servicoRepository chamado_servicoRepository;
-	
-	@PostMapping("/chamado_servico")
-	public ResponseEntity<?> saveChamado_servico(@RequestBody Chamado_servico chamado_servico) {
-		Chamado_servico salvo = chamado_servicoRepository.save(chamado_servico);
-		Map<String, Object> response = new HashMap<>();
-		response.put("mensagem", "Chamado realizado com sucesso!");
-		response.put("id_chamado", salvo.getId_chamado());
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	}
-	
-	@GetMapping("/chamado_servico")
-	public List<Chamado_servico> getChamado_servicos() {
-		return chamado_servicoRepository.findAll();
-	}
-	
-	@GetMapping("/chamado_servico/{id}")
-	public Chamado_servico getChamado_servicoById(@PathVariable Long id) {
-		return chamado_servicoRepository.findById(id)
-			.orElseThrow(() -> new RuntimeException("Não foi possível localizar o chamado!"));
-	}
-	
-	@PutMapping("/chamado_servico/{id}")
-	public String updateChamado_servico(@PathVariable Long id, @RequestBody Chamado_servico novoChamado_servico) {
-		Chamado_servico chamado_servicoSalvo = chamado_servicoRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Não foi possível localizar o chamado!"));
-		
-		chamado_servicoSalvo.setDescricao_chamado(novoChamado_servico.getDescricao_chamado());
-		chamado_servicoSalvo.setStatus(novoChamado_servico.getStatus());
-		chamado_servicoSalvo.setAtendente(novoChamado_servico.getAtendente());
-		
-		chamado_servicoRepository.save(chamado_servicoSalvo);
-		return "O chamado foi atualizado!";
-	}
-	
-	@DeleteMapping("/chamado_servico/{id}")
-	public String deleteChamado_servico(@PathVariable Long id) {
-		chamado_servicoRepository.deleteById(id);
-		return "Chamado deletado!";
-	}
+
+    @Autowired
+    private Chamado_servicoRepository chamado_servicoRepository;
+
+    @GetMapping("/morador/{idMorador}")
+    public List<ChamadoDTO> getChamadosPorMorador(@PathVariable Long idMorador) {
+        List<Chamado_servico> chamados = chamado_servicoRepository.findByMoradorId(idMorador);
+
+        return chamados.stream()
+                .map(c -> new ChamadoDTO(
+                        c.getId_chamado(),
+                        c.getDescricao_chamado(),
+                        c.getStatus() != null ? c.getStatus().name() : "PENDENTE",
+                        c.getData_abertura() != null ? c.getData_abertura().toString() : ""
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @PostMapping
+    public Chamado_servico save(@RequestBody Chamado_servico chamado) {
+        return chamado_servicoRepository.save(chamado);
+    }
+
+    @GetMapping("/{id}")
+    public Chamado_servico getById(@PathVariable Long id) {
+        return chamado_servicoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Chamado não encontrado"));
+    }
+
+    @PutMapping("/{id}")
+    public Chamado_servico update(@PathVariable Long id, @RequestBody Chamado_servico novoChamado) {
+        Chamado_servico chamado = chamado_servicoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Chamado não encontrado"));
+
+        chamado.setDescricao_chamado(novoChamado.getDescricao_chamado());
+        chamado.setStatus(novoChamado.getStatus());
+        chamado.setAtendente(novoChamado.getAtendente());
+
+        return chamado_servicoRepository.save(chamado);
+    }
+
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable Long id) {
+        chamado_servicoRepository.deleteById(id);
+        return "Chamado deletado!";
+    }
+    
+    @GetMapping
+    public List<Chamado_servico> getAllChamados() {
+        return chamado_servicoRepository.findAll();
+    }
 
 }

@@ -41,7 +41,6 @@ public class Anexo_chamadoController {@Autowired
 	public String updateAnexo_chamado(@PathVariable Long id, @RequestBody Anexo_chamado novoAnexo_chamado) {
 		Anexo_chamado anexo_chamadoSalvo = anexo_chamadoRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("Não foi possível encontrar o anexo!"));
-		//caminho_arquivo id_chamado
 		anexo_chamadoSalvo.setCaminho_arquivo(novoAnexo_chamado.getCaminho_arquivo());
 		anexo_chamadoSalvo.setChamado_servico(novoAnexo_chamado.getChamado_servico());
 		
