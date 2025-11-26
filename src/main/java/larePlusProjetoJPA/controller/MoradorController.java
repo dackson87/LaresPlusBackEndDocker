@@ -8,15 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import larePlusProjetoJPA.entity.Morador;
 import larePlusProjetoJPA.repository.MoradorRepository;
@@ -24,86 +16,103 @@ import larePlusProjetoJPA.repository.MoradorRepository;
 @CrossOrigin(origins = "*")
 @RestController
 public class MoradorController {
-	@Autowired
-	private MoradorRepository moradorRepository;
-	
-	@PostMapping("/cadastro_morador")
-	public ResponseEntity<Map<String, Object>> cadastroMorador(@RequestBody Morador morador) {
-	    Optional<Morador> moradorOptional = moradorRepository.findByEmail(morador.getEmail());
 
-	    if (moradorOptional.isPresent()) {
-	        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("mensagem", "Email já cadastrado, use outro!"));
-	    }
+    @Autowired
+    private MoradorRepository moradorRepository;
 
-	    Morador novoMorador = moradorRepository.save(morador);
+    // ============================
+    // CADASTRO DE MORADOR
+    // ============================
+    @PostMapping("/cadastro_morador")
+    public ResponseEntity<Map<String, Object>> cadastroMorador(@RequestBody Morador morador) {
+        Optional<Morador> moradorOptional = moradorRepository.findByEmail(morador.getEmail());
 
-	    Map<String, Object> response = new HashMap<>();
-	    response.put("id_morador", novoMorador.getId_morador());
-	    response.put("mensagem", "Usuário cadastrado com sucesso!");
+        if (moradorOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("mensagem", "Email já cadastrado, use outro!"));
+        }
 
-	    return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	}
+        if (morador.getSenha() == null || morador.getSenha().length() < 4) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("mensagem", "Senha muito fraca!"));
+        }
 
-	@PostMapping("/morador")
-	public String saveMorador(@RequestBody Morador morador) {
-		moradorRepository.save(morador);
-		return "Morador adicionado no sistema!";
-	}
-	
-	@PostMapping("/morador/lista")
-	public String saveMoradores(@RequestBody List<Morador> moradores) {
-		moradorRepository.saveAll(moradores);
-		return "Moradores adicionado no sistema!";
-	}
-	
-	@GetMapping("/validar_morador")
-	public ResponseEntity<?> validarMorador(@RequestParam String email, @RequestParam String senha) {
-	    Optional<Morador> moradorOptional = moradorRepository.findByEmailAndSenha(email, senha);
+        Morador novoMorador = moradorRepository.save(morador);
 
-	    if (moradorOptional.isEmpty()) {
-	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas!");
-	    }
+        Map<String, Object> response = new HashMap<>();
+        response.put("id_morador", novoMorador.getId_morador());
+        response.put("mensagem", "Usuário cadastrado com sucesso!");
 
-	    Morador morador = moradorOptional.get();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
-	    Map<String, Object> response = new HashMap<>();
-	    response.put("id_morador", morador.getId_morador());
-	    response.put("nome", morador.getNome());
-	    response.put("tipo_usuario", morador.getTipo_usuario()); // ⭐ NOVO!
+    // ============================
+    // LOGIN DE MORADOR
+    // ============================
+    @PostMapping("/validar_morador")
+    public ResponseEntity<?> validarMorador(@RequestBody Map<String, String> login) {
+        String email = login.get("email");
+        String senha = login.get("senha");
 
-	    return ResponseEntity.ok(response);
-	}
+        Optional<Morador> moradorOptional = moradorRepository.findByEmailAndSenha(email, senha);
 
-	
-	@GetMapping("/morador")
-	public List<Morador> getMoradoresTESTE() {
-		return moradorRepository.findAll();
-	}
-	
-	@GetMapping("/morador/{id}")
-	public Morador getMoradorById(@PathVariable Long id) {
-		return moradorRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Não foi possível localizar o morador no sistema!"));
-	}
-	
-	@PutMapping("/morador/{id}")
-	public String updateMorador(@PathVariable Long id, @RequestBody Morador novoMorador) {
-		Morador moradorSalvo = moradorRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Não foi possível localizar o morador no sistema!"));
-		
-		moradorSalvo.setNome(novoMorador.getNome());
-		moradorSalvo.setEmail(novoMorador.getEmail());
-		moradorSalvo.setSenha(novoMorador.getSenha());
-		moradorSalvo.setApartamento(novoMorador.getApartamento());
-		
-		moradorRepository.save(moradorSalvo);
-		return "O morador foi atualizado!";
-	}
-		
-	@DeleteMapping("/morador/{id}")
-	public String deleteMorador(@PathVariable Long id) {
-		moradorRepository.deleteById(id);
-		return "Morador foi excluído!";
-	}
+        if (moradorOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("mensagem", "Credenciais inválidas!"));
+        }
 
+        Morador morador = moradorOptional.get();
+
+        // Aqui você pode gerar JWT real futuramente
+        String token = "TOKEN_FICTICIO";
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("id_morador", morador.getId_morador());
+        response.put("nome", morador.getNome());
+        response.put("tipo_usuario", morador.getTipo_usuario());
+        response.put("token", token);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ============================
+    // LISTAGEM E CONSULTA DE MORADORES
+    // ============================
+    @GetMapping("/morador")
+    public List<Morador> getMoradores() {
+        return moradorRepository.findAll();
+    }
+
+    @GetMapping("/morador/{id}")
+    public Morador getMoradorById(@PathVariable Long id) {
+        return moradorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Não foi possível localizar o morador no sistema!"));
+    }
+
+    // ============================
+    // ATUALIZAÇÃO DE MORADOR
+    // ============================
+    @PutMapping("/morador/{id}")
+    public ResponseEntity<Map<String, String>> updateMorador(@PathVariable Long id, @RequestBody Morador novoMorador) {
+        Morador moradorSalvo = moradorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Não foi possível localizar o morador no sistema!"));
+
+        moradorSalvo.setNome(novoMorador.getNome());
+        moradorSalvo.setEmail(novoMorador.getEmail());
+        moradorSalvo.setSenha(novoMorador.getSenha());
+        moradorSalvo.setApartamento(novoMorador.getApartamento());
+
+        moradorRepository.save(moradorSalvo);
+
+        return ResponseEntity.ok(Map.of("mensagem", "O morador foi atualizado!"));
+    }
+
+    // ============================
+    // EXCLUSÃO DE MORADOR
+    // ============================
+    @DeleteMapping("/morador/{id}")
+    public ResponseEntity<Map<String, String>> deleteMorador(@PathVariable Long id) {
+        moradorRepository.deleteById(id);
+        return ResponseEntity.ok(Map.of("mensagem", "Morador foi excluído!"));
+    }
 }

@@ -1,5 +1,6 @@
 package larePlusProjetoJPA.entity;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,7 +31,6 @@ public class Morador {
     @Column(nullable = false, length = 50)
     private String senha;
 
-    // ⭐ NOVO CAMPO: ADM ou MORADOR (padrão: MORADOR)
     @Column(nullable = false, length = 20)
     private String tipo_usuario = "MORADOR";
 
@@ -47,6 +47,14 @@ public class Morador {
     @OneToMany(mappedBy = "morador")
     Set<Chamado_servico> chamados = new HashSet<>();
 
+    // ----------------- NOVOS CAMPOS -----------------
+    @Column(nullable = false)
+    private int tentativasLogin = 0;
+
+    @Column
+    private LocalDateTime bloqueioAte;
+
+    // ----------------- GETTERS E SETTERS -----------------
     public Long getId_morador() {
         return id_morador;
     }
@@ -95,7 +103,19 @@ public class Morador {
         this.apartamento = apartamento;
     }
 
-    public Object getId() {
-        return null;
+    public int getTentativasLogin() {
+        return tentativasLogin;
+    }
+
+    public void setTentativasLogin(int tentativasLogin) {
+        this.tentativasLogin = tentativasLogin;
+    }
+
+    public LocalDateTime getBloqueioAte() {
+        return bloqueioAte;
+    }
+
+    public void setBloqueioAte(LocalDateTime bloqueioAte) {
+        this.bloqueioAte = bloqueioAte;
     }
 }

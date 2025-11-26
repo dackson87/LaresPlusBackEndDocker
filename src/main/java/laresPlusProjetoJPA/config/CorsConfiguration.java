@@ -1,14 +1,23 @@
 package laresPlusProjetoJPA.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class CorsConfiguration implements WebMvcConfigures {
-	
-	@Override
-	public void addCorsMappings(org.springframework.web.servlet.config.annotation.CorsRegistry registry) {
-		registry.addMapping("/**")
-			.allowedOrigins("http://localhost:8081")
-			.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
-	}
+public class CorsConfiguration implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+            .allowedOrigins(
+                "http://localhost:8082",
+                "http://192.168.1.14:8082",
+                "http://localhost:19006",
+                "http://192.168.1.14:19006"
+            )
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .allowedHeaders("*")
+            .allowCredentials(true);
+    }
 }
