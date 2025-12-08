@@ -1,0 +1,30 @@
+services:
+  db:
+    image: mysql:8
+    container_name: laresplus-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laresplusjpa
+    ports:
+      - "3306:3306"
+    networks:
+      - appnet
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laresplus-backend
+    ports:
+      - "8082:8082"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/laresplusjpa?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - appnet
+
+networks:
+  appnet:
